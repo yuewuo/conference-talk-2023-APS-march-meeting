@@ -1,0 +1,295 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>APS2023 Talk Yue</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/customized-white.css" id="theme">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+<style>
+:root {
+  --yale-dark-color: #0a2043;
+  --yale-light-color: #00468b;
+  --main-div-left: 130px;
+  --main-div-top: 130px;
+  --diagram-height: 700px;
+  --diagram-physical-height: 800px;
+  --diagram-width: 1500px;
+  --xzzx-height: 300px;
+  --smallest-scale: 0.55;
+}
+.subtitle {
+	margin-top: 20px !important;
+	color: var(--yale-light-color) !important;
+}
+.main {
+	position: absolute;
+	left: var(--main-div-left);
+	top: var(--main-div-top);
+	width: calc(100% - 2 * var(--main-div-left));
+	/* background-color: red; */
+	text-align: left;
+}
+.reference {
+	font-size: 0.6em;
+	color: darkblue;
+}
+.double-code {
+	position: absolute;
+	/* background-color: grey; */
+	width: var(--diagram-width);
+	height: var(--diagram-physical-height);
+	top: 240px;
+	left: calc((100% - var(--diagram-width))/2);
+}
+.double-code-smaller {
+	position: absolute;
+	/* background-color: grey; */
+	width: calc(var(--diagram-width) * 0.8);
+	height: calc(var(--diagram-physical-height) * 0.8);
+	top: 320px;
+	left: calc((100% - 0.8 * var(--diagram-width))/2);
+}
+.three-code-smaller {
+	position: absolute;
+	/* background-color: grey; */
+	width: calc(var(--diagram-width) * 2 * var(--smallest-scale));
+	height: calc(var(--diagram-physical-height) * var(--smallest-scale));
+	top: 540px;
+	left: calc((100% - var(--smallest-scale) * var(--diagram-width) * 2)/2);
+}
+.xzzx-code {
+	position: absolute;
+	/* background-color: grey; */
+	width: var(--diagram-width);
+	height: var(--xzzx-height);
+	top: 560px;
+	/* background-color: red; */
+	left: calc((100% - var(--diagram-width))/2 + 150px);
+}
+.invisible {
+	position: absolute;
+	width: 0;
+	height: 0;
+	display: none;
+}
+.result-img {
+	position: absolute;
+	width: 900px;
+	height: 570px;
+	top: 450px;
+}
+.circuit-img {
+	position: absolute;
+	width: 900px;
+	height: 450px;
+	top: 550px;
+}
+.img-left {
+	left: 60px;
+}
+.img-right {
+	right: 60px;
+}
+.img-center {
+	left: calc((1920px - 900px) / 2);
+}
+.crumbs {
+	position: absolute !important;
+	left: 10px !important;
+	top: 1010px !important;
+	margin: 0 !important;
+}
+.dot {
+	height: 20px;
+	width: 20px;
+	/* border-radius: 50%; */
+	display: inline-block;
+	margin-left: 15px;
+	transform: rotate(45deg);
+	position: relative;
+	top: -3px;
+}
+</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<section>
+						<h1 style="background: var(--yale-dark-color); color: white; height: 250px; display: flex; align-items: center; margin-top: 150px;">Fusion Blossom: Parallel MWPM Algorithm for QEC</h1>
+						<h4 style="margin-top: 100px; font-weight: 600; margin-bottom: 0;">Yue Wu <span style="font-size: 80%;">$^\dagger$</span></h4>
+						<h4 style="margin-bottom: 0;">Shruti Puri <span style="font-size: 80%;">$^\ddagger$</span></h4>
+						<h4 style="margin-bottom: 0;">Lin Zhong <span style="font-size: 80%;">$^\dagger$</span></h4>
+						<div style="position: absolute; top: 800px; width: 30%; right: 50%;">
+							<img src="img/yale-cs.png" style="width: 400px; margin: 0;">
+						</div>
+						<h4 style="position: absolute; top: 880px; left: 880px;"><span style="font-size: 80%;">$^\dagger$</span></h4>
+						<div style="position: absolute; top: 850px; width: 30%; left: 50%;">
+							<img src="img/YQI_logo_new.png" style="width: 600px; margin: 0;">
+						</div>
+						<h4 style="position: absolute; top: 880px; left: 1530px;"><span style="font-size: 80%;">$^\ddagger$</span></h4>
+					</section>
+				</section>
+			</div>
+		</div>
+
+		<!-- <script src="dist/vue.global.prod.js"></script><script src="https://unpkg.com/vue@3.2.29/dist/vue.global.prod.js"></script> -->
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script src="plugin/math/math.js"></script>
+		<!-- <script src="erd_manhattan.js"></script> -->
+		<!-- <script src="plotter.js"></script> -->
+<script>
+// const app = Vue.createApp({
+// 	data() {
+// 		return {
+// 			start_time: 0,  // time of last slide change operation or fragment show
+// 			last_slide_name: null,
+// 			slide_name: null,
+// 			last_fragment: 0,
+// 			fragment: 0,
+// 			diagram_height: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--diagram-height')),
+// 			diagram_physical_height: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--diagram-physical-height')),
+// 			diagram_width: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--diagram-width')),
+// 			xzzx_height: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--xzzx-height')),
+// 			d: 3,
+// 			// dynamic variables
+// 			dual_A: 0,
+// 			dual_B: 0,
+// 			dual_C: 0,
+// 			dual_D: 0,
+// 			dual_E: 0,
+// 			dual_ABC: 0,
+// 			dual_ABCDE: 0,
+// 			// dual colors
+// 			dual_color_1: blossom_color_func("[0]"),
+// 			dual_color_3: blossom_color_func("[0,1,2]"),
+// 			dual_color_5: blossom_color_func("[0,1,2,3,4]"),
+// 		}
+// 	},
+// 	methods: {
+// 		refreshing_plot() {  // animations
+// 			// console.log("refreshing_plot")
+// 			refreshing_plot.bind(this)()
+// 			// setTimeout(this.refreshing_plot, 10)
+// 			requestAnimationFrame(this.refreshing_plot)
+// 		},
+// 		changed_plot(force_draw=false) {  // static to each slide and fragment
+// 			changed_plot.bind(this)(force_draw)
+// 		},
+// 		display_dual(dual_var) {
+// 			// return "0.00"
+// 			return dual_var.toFixed(2)
+// 		},
+// 	},
+// 	async mounted() {
+// 		this.refreshing_plot()
+
+// 		let plotter = this
+// 		// More info about initialization & config:
+// 		// - https://revealjs.com/initialization/
+// 		// - https://revealjs.com/config/
+// 		Reveal.initialize({
+// 			hash: true,
+
+// 			width: 1920,
+// 			height: 1080,
+// 			margin: 0,
+// 			// minScale: 1,
+// 			// maxScale: 1,
+
+// 			// Learn about plugins: https://revealjs.com/plugins/
+// 			plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ],
+
+// 			center: false,
+// 			controls: false,
+// 			controlsTutorial: false,
+// 			progress: true,
+// 			slideNumber: true,
+// 			slideNumber: 'c/t',
+// 			transition: "none",
+// 			pdfSeparateFragments: false,  // disable fragment in pdf print
+// 			showSlideNumber: window.location.href.includes("?print-pdf") ? 'speaker' : 'all',  // due to a bug in reveal.js, the slide number in printing mode is not correct... do not embed them in printing pdf now
+// 		});
+// 		const listener = (fragment) => {
+// 			// console.log(fragment)
+// 			if (DRAWING_PRINT) return
+// 			const currentSlide = Reveal.getCurrentSlide()
+// 			plotter.last_slide_name = plotter.slide_name
+// 			plotter.slide_name = currentSlide.getAttribute("slide-name")
+// 			plotter.last_fragment = plotter.fragment
+// 			plotter.fragment = fragment
+// 			plotter.start_time = Date.now()
+// 			plotter.changed_plot()
+// 		}
+// 		Reveal.on( 'fragmentshown', event => {
+// 			// event.fragment = the fragment DOM element
+// 			// console.log('fragmentshown')
+// 			// console.log(event.fragment)  // reveal.js has bug when refreshing the page: the fragment is always at the first fragment, leading listening event to fail
+// 			// console.log(parseInt(event.fragment.getAttribute("data-fragment-index")))
+// 			listener(parseInt(event.fragment.getAttribute("data-fragment-index")))
+// 		} );
+// 		Reveal.on( 'fragmenthidden', event => {
+// 			// event.fragment = the fragment DOM element
+// 			// console.log('fragmenthidden')
+// 			// console.log(event.fragment)
+// 			// console.log(parseInt(event.fragment.getAttribute("data-fragment-index")))
+// 			listener(parseInt(event.fragment.getAttribute("data-fragment-index")) - 1)
+// 		} );
+// 		Reveal.on( 'overviewshown', event => {
+// 			DRAWING_PRINT = true
+// 			plotter.changed_plot()
+// 		} );
+// 		Reveal.on( 'overviewhidden', event => {
+// 			DRAWING_PRINT = false
+// 		} );
+// 		setTimeout(() => {  // to avoid signal at first 
+// 			Reveal.on( 'slidechanged', event => {
+// 				// event.previousSlide, event.currentSlide, event.indexh, event.indexv
+// 				// console.log('slidechanged')
+// 				// console.log(event.currentSlide)
+// 				// console.log(event.currentSlide.id)
+// 				// console.log(event.indexh)
+// 				// console.log(event.indexv)
+// 				listener(-1)
+// 			} );
+// 			if (plotter.slide_name == null) {
+// 				listener(-1)
+// 			}
+// 		}, 100)
+// 		// handle print to pdf
+// 		if (window.location.href.includes("?print-pdf")) {
+// 			DRAWING_PRINT = true
+// 			plotter.changed_plot()
+// 		}
+// 	}
+// })
+// app.component('crumbs', {
+// 	props: ['name'],
+// 	template: `
+// <ul class="crumbs">
+// 	<li><a :class="{ 'current-crumb': name == 'motivation', 'not-current': name != 'motivation' }">Motivation</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'surface_code', 'not-current': name != 'surface_code' }">Surface Code</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'mwpm_decoder', 'not-current': name != 'mwpm_decoder' }">MWPM Decoder</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'union_find_decoder', 'not-current': name != 'union_find_decoder' }">Union-Find Decoder</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'mwpm_blossom_algorithm', 'not-current': name != 'mwpm_blossom_algorithm' }">MWPM: Blossom algorithm</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'interpretation', 'not-current': name != 'interpretation' }">Interpretation</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'application', 'not-current': name != 'application' }">Application to XZZX SC</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'numerical', 'not-current': name != 'numerical' }">Numerical Results</a></li>
+// 	<li><a :class="{ 'current-crumb': name == 'conclusion', 'not-current': name != 'conclusion' }">Conclusion</a></li>
+// </ul>`
+// })
+// let $app = app.mount('.reveal')
+</script>
+	</body>
+</html>
