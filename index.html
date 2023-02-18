@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation Maker</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <script src="https://unpkg.com/vue@3"></script> -->
+    <script src="./js/vue.global.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue3-sfc-loader/dist/vue3-sfc-loader.js"></script> -->
+    <script src="./js/vue3-sfc-loader.js"></script>
+
+    <div id="app"></div>
+
+<script>
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const animation_name = urlParams.get("animation") || "independent_errors"
+    const scale = parseFloat(urlParams.get("scale") || "1")
+    var time = Vue.ref(parseFloat(urlParams.get("time") || "0"))
+    window.time = time
+    window.set_time = (new_time) => {
+        time.value = new_time
+        return new_time
+    }
+    window.get_time = () => {
+        return time.value
+    }
+
+    const options = {
+        moduleCache: {
+            vue: Vue
+        },
+        async getFile(url) {
+            const res = await fetch(url);
+            if ( !res.ok )
+                throw Object.assign(new Error(res.statusText + ' ' + url), { res });
+            return {
+                getContentData: asBinary => asBinary ? res.arrayBuffer() : res.text(),
+            }
+        },
+        addStyle(textContent) {
+            const style = Object.assign(document.createElement('style'), { textContent });
+            const ref = document.head.getElementsByTagName('style')[0] || null;
+            document.head.insertBefore(style, ref);
+        },
+    }
+
+    const { loadModule } = window['vue3-sfc-loader'];
+
+    const components = {}
+    components[animation_name] = Vue.defineAsyncComponent( () => loadModule('./independent_errors.vue', options) ),
+
+    Vue.createApp({
+        data() {
+            return {
+                time: time,
+            }
+        },
+        components: components,
+        template: `<${animation_name} :scale="${scale}" :time="time"></${animation_name}>`,
+    }).mount('#app')
+</script>
+</body>
+
+</html>
