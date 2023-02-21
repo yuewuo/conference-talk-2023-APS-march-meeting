@@ -20,14 +20,17 @@ def get_device_pixel_ratio():
 device_pixel_ratio = get_device_pixel_ratio()
 
 class ScreenshotMaker:
-    def __init__(self, url, width=1000, height=1000):
+    def __init__(self, url, width=1000, height=1000, sleep_interval=0.1, headless=True):
         self.url = url
         self.width = width
         self.height = height
         self.screenshots = []
+        self.sleep_interval = sleep_interval
+        self.headless = headless
     def __enter__(self):
         options = Options()
-        options.add_argument("--headless")
+        if self.headless:
+            options.add_argument("--headless")
         service_object = Service(binary_path)
         self.driver = webdriver.Chrome(service=service_object, chrome_options=options)
         self.device_pixel_ratio = self.driver.execute_script("return window.devicePixelRatio")
@@ -49,7 +52,7 @@ class ScreenshotMaker:
     def make_screenshot(self, time, filepath, use_existing_images=False):
         if not use_existing_images:
             self.driver.execute_script(f"set_time({time})")
-            sleep(0.1)
+            sleep(self.sleep_interval)
             self.driver.get_screenshot_as_file(filepath)
         self.screenshots.append(filepath)
     def make_video(self, fps, filepath):

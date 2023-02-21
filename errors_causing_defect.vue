@@ -17,6 +17,7 @@ export default {
         "time": Number,
         "d": { type: Number, default: 5, },
     },
+    emits: ["duration-is"],
     data() {
         return {
             animated_errors: [],

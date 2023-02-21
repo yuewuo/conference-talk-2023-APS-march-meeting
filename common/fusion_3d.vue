@@ -10,7 +10,7 @@
     position: absolute;
     transform-origin: top left;
     top: 0;
-    left: 0;
+    left: v-bind(left + 'px');
     width: v-bind(width + 'px');
     height: v-bind(height + 'px');
 }
@@ -143,14 +143,14 @@ export function translate_edge(left_grown, right_grown, weight) {
 
 export default {
     props: {
-        "time": Number,
+        "left": { type: Number, default: 0, },
         "width": { type: Number, default: 2000, },
         "height": { type: Number, default: 2000, },
         "camera_scale": { type: Number, default: 6, },
         "fusion_data": { type: Object,
             default: fusion_data_example,
         },
-        "snapshot_idx": { type: Number, default: 1, },
+        "snapshot_idx": { type: Number, default: 1, },  // can be any fractional number, if so, the data is interpolated
     },
     data() {
         return {
@@ -216,8 +216,12 @@ export default {
                 return
             }
             const fusion_data = this.fusion_data
-            const snapshot_idx = this.snapshot_idx
-            const snapshot = fusion_data.snapshots[snapshot_idx][1]
+            const snapshot_idx_1 = Math.floor(this.snapshot_idx)
+            const snapshot_idx_2 = snapshot_idx_1 == this.snapshot_idx ? snapshot_idx_1 : snapshot_idx_1 + 1
+            const snapshot_1 = fusion_data.snapshots[snapshot_idx_1][1]
+            const snapshot_2 = fusion_data.snapshots[snapshot_idx_2][1]
+            let s1r = snapshot_idx_1 == this.snapshot_idx ? 1 : (snapshot_idx_2 - this.snapshot_idx)
+            let s2r = snapshot_idx_1 == this.snapshot_idx ? 0 : (this.snapshot_idx - snapshot_idx_1)
             const { scene, vertex_meshes, vertex_outline_meshes, vertex_caches, left_edge_meshes, right_edge_meshes, middle_edge_meshes,
                 edge_caches, blossom_convex_meshes } = this.variables
             // update vertex cache
@@ -234,7 +238,7 @@ export default {
                 })
             }
             // draw vertices
-            for (let [i, vertex] of snapshot.vertices.entries()) {
+            for (let [i, vertex] of snapshot_1.vertices.entries()) {
                 if (vertex == null) {
                     if (i < vertex_meshes.length) {  // hide
                         vertex_meshes[i].visible = false
@@ -265,13 +269,13 @@ export default {
                 }
                 vertex_mesh.visible = true
             }
-            for (let i = snapshot.vertices.length; i < vertex_meshes.length; ++i) {
+            for (let i = snapshot_1.vertices.length; i < vertex_meshes.length; ++i) {
                 vertex_meshes[i].visible = false
             }
             // draw edges
             let subgraph_set = {}
-            if (snapshot.subgraph != null) {
-                for (let edge_index of snapshot.subgraph) {
+            if (snapshot_1.subgraph != null) {
+                for (let edge_index of snapshot_1.subgraph) {
                     subgraph_set[edge_index] = true
                 }
             }
@@ -280,8 +284,8 @@ export default {
                 edge_offset = Math.sqrt(Math.pow(vertex_outline_radius, 2) - Math.pow(edge_radius, 2))
             }
             edge_caches.length = 0  // clear cache
-            for (let [i, edge] of snapshot.edges.entries()) {
-                if (edge == null) {
+            for (let [i, edge_1] of snapshot_1.edges.entries()) {
+                if (edge_1 == null) {
                     if (i < left_edge_meshes.length) {  // hide
                         for (let j of [0, 1]) {
                             left_edge_meshes[i][j].visible = false
@@ -291,8 +295,9 @@ export default {
                     }
                     continue
                 }
-                const left_position = fusion_data.positions[edge.l]
-                const right_position = fusion_data.positions[edge.r]
+                const edge_2 = snapshot_2.edges[i]
+                const left_position = fusion_data.positions[edge_1.l]
+                const right_position = fusion_data.positions[edge_1.r]
                 const relative = compute_vector3(right_position).add(compute_vector3(left_position).multiplyScalar(-1))
                 const direction = relative.clone().normalize()
                 const quaternion = new THREE.Quaternion()
@@ -307,9 +312,11 @@ export default {
                     edge_length = 0
                 }
                 const left_start = local_edge_offset
-                const [left_grown, right_grown] = translate_edge(edge.lg, edge.rg, edge.w)
-                let left_end = local_edge_offset + edge_length * (edge.w == 0 ? 0.5 : (left_grown / edge.w))  // always show 0-weight edge as fully-grown
-                let right_end = local_edge_offset + edge_length * (edge.w == 0 ? 0.5 : (edge.w - right_grown) / edge.w)  // always show 0-weight edge as fully-grown
+                let lg = edge_1.lg * s1r + edge_2.lg * s2r
+                let rg = edge_1.rg * s1r + edge_2.rg * s2r
+                const [left_grown, right_grown] = translate_edge(lg, rg, edge_1.w)
+                let left_end = local_edge_offset + edge_length * (edge_1.w == 0 ? 0.5 : (left_grown / edge_1.w))  // always show 0-weight edge as fully-grown
+                let right_end = local_edge_offset + edge_length * (edge_1.w == 0 ? 0.5 : (edge_1.w - right_grown) / edge_1.w)  // always show 0-weight edge as fully-grown
                 const right_start = local_edge_offset + edge_length
                 edge_caches.push({
                     position: {
@@ -347,7 +354,7 @@ export default {
                             edge_mesh.visible = false
                         }
                         edge_mesh.material = is_grown_part ? grown_edge_material : edge_material
-                        if (snapshot.subgraph != null) {
+                        if (snapshot_1.subgraph != null) {
                             edge_mesh.material = edge_material  // do not display grown edges
                         }
                         if (subgraph_set[i]) {
@@ -356,7 +363,7 @@ export default {
                     }
                 }
             }
-            for (let i = snapshot.edges.length; i < left_edge_meshes.length; ++i) {
+            for (let i = snapshot_1.edges.length; i < left_edge_meshes.length; ++i) {
                 for (let j of [0, 1]) {
                     left_edge_meshes[i][j].visible = false
                     right_edge_meshes[i][j].visible = false
@@ -364,7 +371,7 @@ export default {
                 }
             }
             // draw vertex outlines
-            for (let [i, vertex] of snapshot.vertices.entries()) {
+            for (let [i, vertex] of snapshot_1.vertices.entries()) {
                 if (vertex == null) {
                     if (i < vertex_outline_meshes.length) {  // hide
                         vertex_outline_meshes[i].visible = false
@@ -392,42 +399,50 @@ export default {
                 }
                 vertex_outline_mesh.visible = true
             }
-            for (let i = snapshot.vertices.length; i < vertex_meshes.length; ++i) {
+            for (let i = snapshot_1.vertices.length; i < vertex_meshes.length; ++i) {
                 vertex_outline_meshes[i].visible = false
             }
             // draw convex
-            if (snapshot.dual_nodes != null) {
+            if (snapshot_1.dual_nodes != null) {
                 for (let blossom_convex_mesh of blossom_convex_meshes) {
                     scene.remove( blossom_convex_mesh )
                     blossom_convex_mesh.geometry.dispose()
                 }
-                for (let [i, dual_node] of snapshot.dual_nodes.entries()) {
-                    if (dual_node == null) { continue }
-                    if (snapshot.subgraph != null) { continue }  // do not display convex if subgraph is displayed
+                for (let [i, dual_node_1] of snapshot_1.dual_nodes.entries()) {
+                    let dual_node_2 = null
+                    if (snapshot_2.dual_nodes != null && i < snapshot_2.dual_nodes.length) dual_node_2 = snapshot_2.dual_nodes[i]
+                    if (dual_node_1 == null && dual_node_2 == null) { continue }
+                    if (snapshot_1.subgraph != null) { continue }  // do not display convex if subgraph is displayed
                     // for child node in a blossom, this will not display properly; we should avoid plotting child nodes
-                    let display_node = dual_node.p == null && (dual_node.d > 0 || dual_node.o != null)
+                    let composed_dual_node = {
+                        d: dual_node_1 == null ? dual_node_2.d : (dual_node_2 == null ? dual_node_1.d : dual_node_1.d * s1r + dual_node_2.d * s2r),
+                    }
+                    let display_node = dual_node_1.p == null && (composed_dual_node.d > 0 || dual_node_1.o != null)
                     if (display_node) {  // no parent and (positive dual variable or it's a blossom)
                         let points = []
-                        if (dual_node.b != null) {
-                            for (let [is_left, edge_index] of dual_node.b) {
+                        if (dual_node_2.b != null) {
+                            for (let [is_left, edge_index] of dual_node_2.b) {
                                 let cached_position = edge_caches[edge_index].position
-                                const edge = snapshot.edges[edge_index]
-                                if (edge.ld == edge.rd && edge.lg + edge.rg >= edge.w) {
+                                const edge_1 = snapshot_1.edges[edge_index]
+                                const edge_2 = snapshot_2.edges[edge_index]
+                                const lg = edge_1.lg * s1r + edge_2.lg * s2r
+                                const rg = edge_1.rg * s1r + edge_2.rg * s2r
+                                if (edge_1.ld == edge_1.rd && lg + rg >= edge_1.w) {
                                     continue  // do not draw this edge, this is an internal edge
                                 }
                                 if (is_left) {
-                                    if (edge.lg == edge.w) {
-                                        points.push(vertex_caches[edge.r].position.center.clone())
-                                    } else if (edge.lg == 0) {
-                                        points.push(vertex_caches[edge.l].position.center.clone())
+                                    if (lg == edge_1.w) {
+                                        points.push(vertex_caches[edge_1.r].position.center.clone())
+                                    } else if (lg == 0) {
+                                        points.push(vertex_caches[edge_1.l].position.center.clone())
                                     } else {
                                         points.push(cached_position.left_end.clone())
                                     }
                                 } else {
-                                    if (edge.rg == edge.w) {
-                                        points.push(vertex_caches[edge.l].position.center.clone())
-                                    } else if (edge.rg == 0) {
-                                        points.push(vertex_caches[edge.r].position.center.clone())
+                                    if (rg == edge_1.w) {
+                                        points.push(vertex_caches[edge_1.l].position.center.clone())
+                                    } else if (rg == 0) {
+                                        points.push(vertex_caches[edge_1.r].position.center.clone())
                                     } else {
                                         points.push(cached_position.right_end.clone())
                                     }
@@ -466,6 +481,15 @@ export default {
         },
     },
     watch: {
+        snapshot_idx() {
+            this.refresh_snapshot_data()
+        },
+        snapshot_idx_interpolated() {
+
+        },
+        fusion_data() {
+            this.refresh_snapshot_data()
+        },
     },
 }
 </script>
