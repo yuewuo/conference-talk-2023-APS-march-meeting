@@ -42,6 +42,7 @@ class ScreenshotMaker:
         if viewport_width != self.width:
             print(f"[warning] cannot set width to desired {self.viewport_width}, current width is {viewport_width}, please use a higher resolution")
         self.driver.get(self.url)
+        self.driver.execute_script(f"hide_control()")
         return self
     def __exit__(self, *args):
         self.driver.quit()

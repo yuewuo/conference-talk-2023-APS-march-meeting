@@ -1,12 +1,35 @@
 <template>
     <div :style="{ transform: `scale(${scale})` }" class="canvas">
-        <h1>Hello at {{ time }}</h1>
+        <!-- error chains --><div v-for="error of animated_errors">
+            <div v-if="show_error_chain && error_current_show(error)" class="error-chain" :style="{ 'top': pos(error.i) - 1000 * scaling + 'px', 'left': pos(error.j) - 1000 * scaling + 'px' }">
+                <div v-if="error_chain_has_vertical(error)" class="vertical-error-chain"></div>
+                <div v-if="error_chain_has_horizontal(error)" class="horizontal-error-chain"></div>
+            </div>
+        </div>
+        <!-- qubits --><div v-for="(_i, i) in (2*d+1)">
+            <div v-for="(_j, j) in (2*d+1)">
+                <div v-if="qubit_show(i, j)" class="qubit" :style="{ 'background-color': qubit_color(i, j), 'opacity': qubit_opacity, 'top': pos(i) - qubit_radius + 'px', 'left': pos(j) - qubit_radius + 'px', }"></div>
+            </div>
+        </div>
+        <!-- errors --><div v-for="error of animated_errors">
+            <div v-if="error_current_show(error)" class="error" :style="{ 'top': pos(error.i) - error_radius + 'px', 'left': pos(error.j) - error_radius + 'px', 'opacity': error_opacity(error), }">
+                {{ error.text }}
+            </div>
+            <div v-if="error_current_show(error)" class="error-circle" :style="{ 'border': `dotted 10px ${error_border_color(error)}`, 'top': pos(error.i) - error_radius - 5 + 'px', 'left': pos(error.j) - error_radius - 5 + 'px'
+                , 'opacity': error_opacity(error), 'transform': `rotate(${parseInt(error_rotate_speed * (time - error.start))}deg)` }">
+            </div>
+        </div>
+        <!-- syndrome --><div v-for="defect of animated_syndrome">
+            <div v-if="error_current_show(defect)" class="defect" :style="{ 'top': pos(defect.i) - qubit_radius + 'px', 'left': pos(defect.j) - qubit_radius + 'px', }">
+                
+            </div>
+        </div>
     </div>
 </template>
 
 <style>
 .canvas {
-    background-color: red;
+    /* background-color: lightblue; */
     position: absolute;
     transform-origin: top left;
     top: 0;
@@ -14,16 +37,85 @@
     width: 1000px;
     height: 1000px;
 }
+.qubit {
+    position: absolute;
+    width: v-bind(2 * qubit_radius + 'px');
+    height: v-bind(2 * qubit_radius + 'px');
+    border-radius: v-bind(2 * qubit_radius + 'px');
+}
+.error {
+    /* background-color: red; */
+    position: absolute;
+    width: v-bind(2 * error_radius + 'px');
+    height: v-bind(2 * error_radius + 'px');
+    border-radius: v-bind(2 * error_radius + 'px');
+    color: red;
+    line-height: v-bind(2 * error_radius + 'px');
+    font-size:  v-bind(1.5 * error_radius + 'px');
+    font-family: Sans-Serif;
+    text-align: center;
+    font-weight: bold;
+}
+.error-circle {
+    position: absolute;
+    width: v-bind(2 * error_radius - 10 + 'px');
+    height: v-bind(2 * error_radius - 10 + 'px');
+    border-radius: v-bind(2 * error_radius + 'px');
+}
+.defect {
+    position: absolute;
+    width: v-bind(2 * qubit_radius + 'px');
+    height: v-bind(2 * qubit_radius + 'px');
+    border-radius: v-bind(2 * qubit_radius + 'px');
+    background-color: red;
+}
+.error-chain {
+    position: absolute;
+    width: v-bind(2000 * scaling + 'px');
+    height: v-bind(2000 * scaling + 'px');
+    /* background-color: blue; */
+}
+.vertical-error-chain {
+    position: relative;
+    width: v-bind(200 * scaling + 'px');
+    height: v-bind(2000 * scaling + 'px');
+    left: v-bind(900 * scaling + 'px');
+    border-radius: v-bind(200 * scaling + 'px');
+    background-color: red;
+    opacity: 0.2;
+}
+.horizontal-error-chain {
+    position: relative;
+    width: v-bind(2000 * scaling + 'px');
+    top: v-bind(900 * scaling + 'px');
+    height: v-bind(200 * scaling + 'px');
+    border-radius: v-bind(200 * scaling + 'px');
+    background-color: red;
+    opacity: 0.2;
+}
 </style>
 
 <script>
 export default {
     props: {
-        "scale": {
-            type: Number,
-            default: 1,
-        },
+        "scale": { type: Number, default: 1, },
+        "d": { type: Number, default: 3, },
         "time": Number,
+        "animated_errors": { type: Array,
+            default: [],
+            // default: [ { start:0.5, last: 0.8, animate: 0.1, i: 2, j: 2, text: 'X' } ],
+        },
+        "show_virtual": { type: Boolean, default: true, },
+        "error_rotate_speed": { type: Number, default: 200, },
+        "animated_syndrome": { type: Array,
+            default: [],
+            // default: [ { start:0.5, last: 0.8, animate: 0.1, i: 2, j: 3 } ],
+        },
+        "show_x_stabilizer": { type: Boolean, default: true, },
+        "show_z_stabilizer": { type: Boolean, default: true, },
+        "show_data_qubits": { type: Boolean, default: true, },
+        "qubit_opacity": { type: Number, default: 1, },
+        "show_error_chain": { type: Boolean, default: false, },
     },
     data() {
         return {
@@ -31,13 +123,120 @@ export default {
         }
     },
     mounted() {
-        console.log("hello")
+        console.log("error model component mounted")
     },
     computed: {
-        
+        scaling() {
+            return 1 / (2 * this.d + 2)
+        },
+        qubit_radius() {
+            return 250 * this.scaling
+        },
+        error_radius() {
+            return this.qubit_radius * 1.5
+        },
     },
     methods: {
-        
+        qubit_color(i, j) {
+            if (this.qubit_is_virtual(i, j)) {
+                return 'yellow'
+            }
+            if (this.qubit_is_data(i, j)) {
+                return 'black'
+            }
+            if (this.qubit_is_x_stab(i, j)) {
+                return 'green'
+            }
+            if (this.qubit_is_z_stab(i, j)) {
+                return 'blue'
+            }
+            return 'orange'
+        },
+        pos(i) {
+            return 1000 * (0.5 + (i - this.d) * this.scaling)
+        },
+        qubit_show(i, j) {
+            if (i == 0 || i == 2 * this.d) {  // X virtual
+                return this.show_x_stabilizer && this.show_virtual && j % 2 == 1
+            }
+            if (j == 0 || j == 2 * this.d) {  // Z virtual
+                return this.show_z_stabilizer && this.show_virtual && i % 2 == 1
+            }
+            if (this.qubit_is_x_stab(i, j)) {
+                return this.show_x_stabilizer
+            }
+            if (this.qubit_is_z_stab(i, j)) {
+                return this.show_z_stabilizer
+            }
+            return this.show_data_qubits
+        },
+        qubit_is_virtual(i, j) {
+            if (i == 0 || i == 2 * this.d) {
+                return j % 2 == 1
+            }
+            if (j == 0 || j == 2 * this.d) {
+                return i % 2 == 1
+            }
+            return false
+        },
+        qubit_is_data(i, j) {
+            return (i + j) % 2 == 0
+        },
+        qubit_is_x_stab(i, j) {
+            return !this.qubit_is_data(i, j) && i % 2 == 0
+        },
+        qubit_is_z_stab(i, j) {
+            return !this.qubit_is_data(i, j) && i % 2 == 1
+        },
+        error_current_show(error) {
+            return this.time >= error.start && this.time <= error.start + error.last + error.animate
+        },
+        error_opacity(error) {
+            if (!this.error_current_show(error)) return 0
+            let ratio = null
+            if (this.time - error.start <= error.animate) {
+                ratio = (this.time - error.start) / error.animate
+            }
+            if (this.time >= error.start + error.last) {
+                ratio = 1 - (this.time - error.start - error.last) / error.animate
+            }
+            if (ratio != null) {
+                return ratio
+            }
+            return 1
+        },
+        error_border_color(error) {
+            if (error.text == "X") {
+                return "green"
+            }
+            if (error.text == "Z") {
+                return "blue"
+            }
+            return "red"
+        },
+        error_chain_has_vertical(error) {
+            if (this.qubit_is_x_stab(error.i + 1, error.j) && (error.text == "Z" || error.text == "Y")) {
+                return true
+            }
+            if (this.qubit_is_z_stab(error.i + 1, error.j) && (error.text == "X" || error.text == "Y")) {
+                return true
+            }
+            return false
+        },
+        error_chain_has_horizontal(error) {
+            if (this.qubit_is_x_stab(error.i, error.j + 1) && (error.text == "Z" || error.text == "Y")) {
+                return true
+            }
+            if (this.qubit_is_z_stab(error.i, error.j + 1) && (error.text == "X" || error.text == "Y")) {
+                return true
+            }
+            return false
+        },
+    },
+    watch: {
+        animated_errors() {
+            console.log(this.animated_errors)
+        },
     },
 }
 </script>
