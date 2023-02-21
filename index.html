@@ -36,6 +36,20 @@ body {
 </head>
 
 <body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.139.2/build/three.module.js",
+                "./node_modules/three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.139.2/examples/jsm/controls/OrbitControls.js",
+                "./node_modules/three/examples/jsm/geometries/ConvexGeometry.js": "https://cdn.jsdelivr.net/npm/three@0.139.2/examples/jsm/geometries/ConvexGeometry.js",
+                "./node_modules/three/examples/jsm/libs/stats.module.js": "https://cdn.jsdelivr.net/npm/three@0.139.2/examples/jsm/libs/stats.module.js",
+                "./node_modules/three/examples/jsm/libs/lil-gui.module.min.js": "https://cdn.jsdelivr.net/npm/three@0.139.2/examples/jsm/libs/lil-gui.module.min.js"
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hull.js@1.0.2/dist/hull.js"></script>
+
     <script src="./js/seedrandom.js"></script>
     <!-- <script src="https://unpkg.com/vue@3"></script> -->
     <script src="./js/vue.global.js"></script>
@@ -44,7 +58,19 @@ body {
 
     <div id="app"></div>
 
-<script>
+
+<script type="module" async>
+    import * as THREE from '../js/three.module.js'
+    window.THREE = THREE
+    import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js'
+    window.OrbitControls = OrbitControls
+    import { ConvexGeometry } from './node_modules/three/examples/jsm/geometries/ConvexGeometry.js'
+    window.ConvexGeometry = ConvexGeometry
+
+    // use default fusion data for debugging purpose
+    let response = await fetch('./common/primal_module_serial_basic_10.json', { cache: 'no-cache', })
+    const fusion_data_example = await response.json()
+    window.fusion_data_example = fusion_data_example
 
     const urlParams = new URLSearchParams(window.location.search)
     const animation_name = urlParams.get("animation") || "independent_errors"
