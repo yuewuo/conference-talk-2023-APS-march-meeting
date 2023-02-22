@@ -1,5 +1,5 @@
 <template>
-    <ErrorModel :scale="scale" :time="time" :d="d" ref="error_model" :animated_errors="animated_errors" :animated_syndrome="animated_syndrome" :qubit_opacity="0.1" :show_error_chain="true"></ErrorModel>
+    <ErrorModel :scale="scale" :time="time" :d="d" ref="error_model" :animated_errors="animated_errors" :animated_syndrome="animated_syndrome" :qubit_opacity="0.2" :show_error_chain="true" :show_operator_x="true" :show_operator_z="true" :operator_opacity="0.2"></ErrorModel>
 </template>
 
 <style>

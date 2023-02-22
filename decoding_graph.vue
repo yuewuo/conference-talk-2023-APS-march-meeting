@@ -1,6 +1,6 @@
 <template>
     <Fusion3d ref="fusion3d" :fusion_data="decoding_graph_fusion_data" :camera_scale="3" :edge_opacity="0.5"></Fusion3d>
-    <ErrorModel :scale="scale" :time="time" :d="d" ref="error_model" :animated_errors="animated_errors" :animated_syndrome="animated_syndrome" :qubit_opacity="0.1" :show_error_chain="true" :show_x_stabilizer="false"></ErrorModel>
+    <ErrorModel :scale="scale" :time="time" :d="d" ref="error_model" :animated_errors="animated_errors" :animated_syndrome="animated_syndrome" :qubit_opacity="0.2" :show_error_chain="true" :show_x_stabilizer="false" :show_operator_z="true" :operator_opacity="0.2"></ErrorModel>
 </template>
 
 <style>

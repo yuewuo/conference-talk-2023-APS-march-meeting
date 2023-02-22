@@ -3,24 +3,24 @@
         <!-- stabilizer operator --><div v-for="(_i, i) in (2*d+1)">
             <div v-for="(_j, j) in (2*d+1)">
                 <div v-if="!qubit_is_virtual(i, j) && !qubit_is_data(i, j) && (qubit_is_x_stab(i, j) ? show_operator_x : show_operator_z)"
-                        class="stabilizer-operator" :style="{ 'top': pos(i) - 1000 * scaling + 'px', 'left': pos(j) - 1000 * scaling + 'px', }">
+                        class="stabilizer-operator" :style="{ 'top': pos(i) - 1000 * scaling + 'px', 'left': pos(j) - 1000 * scaling + 'px', 'opacity': operator_opacity }">
                     <div class="stabilizer-left-top" v-if="qubit_show(i-1, j) && qubit_show(i, j-1)"
-                        :style="{ 'border-bottom': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                        :style="{ 'border-bottom': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : '#86bbd8'}` }"></div>
                     <div class="stabilizer-right-top" v-if="qubit_show(i-1, j) && qubit_show(i, j+1)"
-                        :style="{ 'border-bottom': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                        :style="{ 'border-bottom': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : '#86bbd8'}` }"></div>
                     <div class="stabilizer-left-bottom" v-if="qubit_show(i+1, j) && qubit_show(i, j-1)"
-                        :style="{ 'border-top': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                        :style="{ 'border-top': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : '#86bbd8'}` }"></div>
                     <div class="stabilizer-right-bottom" v-if="qubit_show(i+1, j) && qubit_show(i, j+1)"
-                        :style="{ 'border-top': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                        :style="{ 'border-top': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : '#86bbd8'}` }"></div>
                     <!-- text -->
                     <div class="stabilizer-text stabilizer-text-top" v-if="qubit_show(i-1, j)"
-                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? '#97a169' : '#33658a' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
                     <div class="stabilizer-text stabilizer-text-bottom" v-if="qubit_show(i+1, j)"
-                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? '#97a169' : '#33658a' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
                     <div class="stabilizer-text stabilizer-text-left" v-if="qubit_show(i, j-1)"
-                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? '#97a169' : '#33658a' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
                     <div class="stabilizer-text stabilizer-text-right" v-if="qubit_show(i, j+1)"
-                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? '#97a169' : '#33658a' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
                 </div>
             </div>
         </div>
@@ -74,6 +74,7 @@
     height: v-bind(2 * error_radius + 'px');
     border-radius: v-bind(2 * error_radius + 'px');
     color: red;
+    -webkit-text-stroke: 2px white;
     line-height: v-bind(2 * error_radius + 'px');
     font-size:  v-bind(1.5 * error_radius + 'px');
     font-family: Sans-Serif;
@@ -204,6 +205,7 @@ export default {
         "show_error_chain": { type: Boolean, default: false, },
         "show_operator_x": { type: Boolean, default: false, },
         "show_operator_z": { type: Boolean, default: false, },
+        "operator_opacity": { type: Number, default: 1, },
     },
     data() {
         return {
@@ -233,10 +235,10 @@ export default {
                 return 'black'
             }
             if (this.qubit_is_x_stab(i, j)) {
-                return 'green'
+                return '#97a169'
             }
             if (this.qubit_is_z_stab(i, j)) {
-                return 'blue'
+                return '#33658a'
             }
             return 'orange'
         },
@@ -295,10 +297,10 @@ export default {
         },
         error_border_color(error) {
             if (error.text == "X") {
-                return "green"
+                return "#97a169"
             }
             if (error.text == "Z") {
-                return "blue"
+                return "#33658a"
             }
             return "red"
         },

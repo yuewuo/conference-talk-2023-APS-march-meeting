@@ -152,6 +152,7 @@ export default {
         },
         "snapshot_idx": { type: Number, default: 0, },  // can be any fractional number, if so, the data is interpolated
         "edge_opacity": { type: Number, default: edge_material.opacity },
+        "show_dual_region": { type: Boolean, default: true },
     },
     data() {
         return {
@@ -406,7 +407,7 @@ export default {
                 vertex_outline_meshes[i].visible = false
             }
             // draw convex
-            if (snapshot_1.dual_nodes != null) {
+            if (snapshot_1.dual_nodes != null && this.show_dual_region) {
                 for (let blossom_convex_mesh of blossom_convex_meshes) {
                     scene.remove( blossom_convex_mesh )
                     blossom_convex_mesh.geometry.dispose()
