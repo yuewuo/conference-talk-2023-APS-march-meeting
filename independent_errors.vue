@@ -44,7 +44,7 @@ export default {
                         this.animated_errors.push({
                             start: (round + 0.1) / error_rounds * duration,
                             last: 0.8 / error_rounds * duration,
-                            animate: 0.1,
+                            animate: 0.3,
                             i, j, text: err,
                         })
                     }

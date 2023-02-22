@@ -150,7 +150,8 @@ export default {
         "fusion_data": { type: Object,
             default: fusion_data_example,
         },
-        "snapshot_idx": { type: Number, default: 1, },  // can be any fractional number, if so, the data is interpolated
+        "snapshot_idx": { type: Number, default: 0, },  // can be any fractional number, if so, the data is interpolated
+        "edge_opacity": { type: Number, default: edge_material.opacity },
     },
     data() {
         return {
@@ -158,6 +159,8 @@ export default {
         }
     },
     async mounted() {
+        // update properties
+        edge_material.opacity = this.edge_opacity
         // create scene
         const scene = new THREE.Scene()
         scene.background = new THREE.Color( 0xffffff )  // for better image output

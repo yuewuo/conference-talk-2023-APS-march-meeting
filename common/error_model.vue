@@ -1,7 +1,31 @@
 <template>
     <div :style="{ transform: `scale(${scale})` }" class="canvas">
+        <!-- stabilizer operator --><div v-for="(_i, i) in (2*d+1)">
+            <div v-for="(_j, j) in (2*d+1)">
+                <div v-if="!qubit_is_virtual(i, j) && !qubit_is_data(i, j) && (qubit_is_x_stab(i, j) ? show_operator_x : show_operator_z)"
+                        class="stabilizer-operator" :style="{ 'top': pos(i) - 1000 * scaling + 'px', 'left': pos(j) - 1000 * scaling + 'px', }">
+                    <div class="stabilizer-left-top" v-if="qubit_show(i-1, j) && qubit_show(i, j-1)"
+                        :style="{ 'border-bottom': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                    <div class="stabilizer-right-top" v-if="qubit_show(i-1, j) && qubit_show(i, j+1)"
+                        :style="{ 'border-bottom': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                    <div class="stabilizer-left-bottom" v-if="qubit_show(i+1, j) && qubit_show(i, j-1)"
+                        :style="{ 'border-top': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                    <div class="stabilizer-right-bottom" v-if="qubit_show(i+1, j) && qubit_show(i, j+1)"
+                        :style="{ 'border-top': `${950 * scaling}px solid ${qubit_is_x_stab(i, j) ? 'rgb(193, 217, 185)' : 'rgb(178, 178, 253)'}` }"></div>
+                    <!-- text -->
+                    <div class="stabilizer-text stabilizer-text-top" v-if="qubit_show(i-1, j)"
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                    <div class="stabilizer-text stabilizer-text-bottom" v-if="qubit_show(i+1, j)"
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                    <div class="stabilizer-text stabilizer-text-left" v-if="qubit_show(i, j-1)"
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                    <div class="stabilizer-text stabilizer-text-right" v-if="qubit_show(i, j+1)"
+                        :style="{ 'color': qubit_is_x_stab(i, j) ? 'green' : 'blue' }">{{ qubit_is_x_stab(i, j) ? 'X' : 'Z' }}</div>
+                </div>
+            </div>
+        </div>
         <!-- error chains --><div v-for="error of animated_errors">
-            <div v-if="show_error_chain && error_current_show(error)" class="error-chain" :style="{ 'top': pos(error.i) - 1000 * scaling + 'px', 'left': pos(error.j) - 1000 * scaling + 'px' }">
+            <div v-if="show_error_chain && error_current_show(error)" class="error-chain" :style="{ 'opacity': error_opacity(error), 'top': pos(error.i) - 1000 * scaling + 'px', 'left': pos(error.j) - 1000 * scaling + 'px' }">
                 <div v-if="error_chain_has_vertical(error)" class="vertical-error-chain"></div>
                 <div v-if="error_chain_has_horizontal(error)" class="horizontal-error-chain"></div>
             </div>
@@ -20,7 +44,7 @@
             </div>
         </div>
         <!-- syndrome --><div v-for="defect of animated_syndrome">
-            <div v-if="error_current_show(defect)" class="defect" :style="{ 'top': pos(defect.i) - qubit_radius + 'px', 'left': pos(defect.j) - qubit_radius + 'px', }">
+            <div v-if="error_current_show(defect)" class="defect" :style="{ 'opacity': error_opacity(defect), 'top': pos(defect.i) - qubit_radius + 'px', 'left': pos(defect.j) - qubit_radius + 'px', }">
                 
             </div>
         </div>
@@ -93,6 +117,68 @@
     background-color: red;
     opacity: 0.2;
 }
+.stabilizer-operator {
+    position: absolute;
+    width: v-bind(2000 * scaling + 'px');
+    height: v-bind(2000 * scaling + 'px');
+}
+.stabilizer-left-top {
+    position: absolute;
+    top: v-bind(50 * scaling + 'px');
+    left: v-bind(50 * scaling + 'px');
+    border-left: v-bind(950 * scaling + 'px') solid transparent;
+    border-right: v-bind(0 * scaling + 'px') solid transparent;
+    width: 0;
+    height: 0;
+}
+.stabilizer-right-top {
+    position: absolute;
+    top: v-bind(50 * scaling + 'px');
+    left: v-bind(990 * scaling + 'px');
+    border-left: v-bind(0 * scaling + 'px') solid transparent;
+    border-right: v-bind(950 * scaling + 'px') solid transparent;
+    width: 0;
+    height: 0;
+}
+.stabilizer-left-bottom {
+    position: absolute;
+    top: v-bind(990 * scaling + 'px');
+    left: v-bind(50 * scaling + 'px');
+    border-left: v-bind(950 * scaling + 'px') solid transparent;
+    border-right: v-bind(0 * scaling + 'px') solid transparent;
+    width: 0;
+    height: 0;
+}
+.stabilizer-right-bottom {
+    position: absolute;
+    top: v-bind(990 * scaling + 'px');
+    left: v-bind(990 * scaling + 'px');
+    border-left: v-bind(0 * scaling + 'px') solid transparent;
+    border-right: v-bind(950 * scaling + 'px') solid transparent;
+    width: 0;
+    height: 0;
+}
+.stabilizer-text {
+    position: absolute;
+    font-size: v-bind(300 * scaling + 'px');
+    font-family: Sans-Serif;
+}
+.stabilizer-text-top {
+    top: v-bind(250 * scaling + 'px');
+    left: v-bind(900 * scaling + 'px');
+}
+.stabilizer-text-bottom {
+    top: v-bind(1450 * scaling + 'px');
+    left: v-bind(900 * scaling + 'px');
+}
+.stabilizer-text-left {
+    top: v-bind(850 * scaling + 'px');
+    left: v-bind(300 * scaling + 'px');
+}
+.stabilizer-text-right {
+    top: v-bind(850 * scaling + 'px');
+    left: v-bind(1500 * scaling + 'px');
+}
 </style>
 
 <script>
@@ -116,6 +202,8 @@ export default {
         "show_data_qubits": { type: Boolean, default: true, },
         "qubit_opacity": { type: Number, default: 1, },
         "show_error_chain": { type: Boolean, default: false, },
+        "show_operator_x": { type: Boolean, default: false, },
+        "show_operator_z": { type: Boolean, default: false, },
     },
     data() {
         return {

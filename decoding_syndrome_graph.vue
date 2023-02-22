@@ -1,6 +1,6 @@
 <template>
-    <Fusion3d :time="time" ref="fusion3d" :fusion_data="decoding_graph_fusion_data" :snapshot_idx="snapshot_idx_interpolated"></Fusion3d>
-    <Fusion3d :left="2500" :time="time" ref="fusion3d" :fusion_data="syndrome_graph_fusion_data" :snapshot_idx="snapshot_idx_interpolated"></Fusion3d>
+    <Fusion3d ref="fusion3d" :fusion_data="decoding_graph_fusion_data" :snapshot_idx="snapshot_idx_interpolated"></Fusion3d>
+    <Fusion3d :left="2500" ref="fusion3d" :fusion_data="syndrome_graph_fusion_data" :snapshot_idx="snapshot_idx_interpolated"></Fusion3d>
 </template>
 
 <style>

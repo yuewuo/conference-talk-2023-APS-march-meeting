@@ -33,6 +33,8 @@ class ScreenshotMaker:
             options.add_argument("--headless")
         service_object = Service(binary_path)
         self.driver = webdriver.Chrome(service=service_object, chrome_options=options)
+        if not self.headless:
+            self.driver.set_window_position(3000, 0)  # put window in the dummy monitor
         self.device_pixel_ratio = self.driver.execute_script("return window.devicePixelRatio")
         self.driver.set_window_size(self.width, self.height)
         viewport_height = self.driver.execute_script("return window.innerHeight")
