@@ -51,7 +51,7 @@
     </div>
 </template>
 
-<style>
+<style scoped>
 .canvas {
     /* background-color: lightblue; */
     position: absolute;

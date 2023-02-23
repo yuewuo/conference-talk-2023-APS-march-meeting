@@ -1,6 +1,8 @@
 <template>
     <Fusion3d ref="fusion3d" :fusion_data="decoding_graph_fusion_data" :snapshot_idx="snapshot_idx_interpolated" :camera_scale="3"></Fusion3d>
+    <ExampleBothGrow :scale="scale" :d="d" ref="example1" :tight_edges="[ { i1: 3, j1: 0, i2: 3, j2: 2 } ]"></ExampleBothGrow>
     <Fusion3d :left="2500" ref="fusion3d" :fusion_data="syndrome_graph_fusion_data" :snapshot_idx="snapshot_idx_interpolated" :camera_scale="3" :show_dual_region="false"></Fusion3d>
+    <ExampleBothGrow :left="2500" :scale="scale" :d="d" ref="example2" :tight_edges="[ { i1: 3, j1: 0, i2: 3, j2: 2 } ]"></ExampleBothGrow>
 </template>
 
 <style>
@@ -9,8 +11,10 @@
 
 <script>
 import fusion_3d from './common/fusion_3d.vue'
+import example_both_grow from './common/example_both_grow.vue'
 
-const duration = 2
+const showing = 2
+const duration = 2.5
 
 export default {
     props: {
@@ -27,6 +31,7 @@ export default {
     },
     components: {
         Fusion3d: fusion_3d,
+        ExampleBothGrow: example_both_grow,
     },
     async mounted() {
         this.$emit('duration-is', duration)
@@ -41,7 +46,10 @@ export default {
     computed: {
         snapshot_idx_interpolated() {
             let time = this.time
-            return this.smooth_animate(time / duration)
+            if (time < showing) {
+                return this.smooth_animate(time / showing) + 1
+            }
+            return 2
         },
     },
     methods: {

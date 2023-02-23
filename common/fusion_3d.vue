@@ -4,7 +4,7 @@
     </div>
 </template>
 
-<style>
+<style scoped>
 .canvas {
     /* background-color: lightblue; */
     position: absolute;
@@ -164,7 +164,7 @@ export default {
         edge_material.opacity = this.edge_opacity
         // create scene
         const scene = new THREE.Scene()
-        scene.background = new THREE.Color( 0xffffff )  // for better image output
+        // scene.background = new THREE.Color( 0xffffff )  // for better image output
         scene.add( new THREE.AmbientLight( 0xffffff ) )
         const aspect_ratio = this.width / this.height
         const camera_scale = this.camera_scale
@@ -425,7 +425,7 @@ export default {
                     if (display_node) {  // no parent and (positive dual variable or it's a blossom)
                         let points = []
                         if (dual_node_2.b != null) {
-                            for (let [is_left, edge_index] of dual_node_2.b) {
+                            for (let [is_left, edge_index] of dual_node_1.b) {
                                 let cached_position = edge_caches[edge_index].position
                                 const edge_1 = snapshot_1.edges[edge_index]
                                 const edge_2 = snapshot_2.edges[edge_index]
