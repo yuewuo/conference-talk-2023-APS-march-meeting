@@ -13,7 +13,7 @@
     /* background-color: lightblue; */
     position: absolute;
     transform-origin: top left;
-    top: 0;
+    top: v-bind(top + 'px');
     left: v-bind(left + 'px');
     width: 1000px;
     height: 1000px;
@@ -29,6 +29,7 @@
 <script>
 export default {
     props: {
+        "top": { type: Number, default: 0, },
         "left": { type: Number, default: 0, },
         "scale": { type: Number, default: 1, },
         "d": { type: Number, default: 3, },

@@ -9,7 +9,7 @@
     /* background-color: lightblue; */
     position: absolute;
     transform-origin: top left;
-    top: 0;
+    top: v-bind(top + 'px');
     left: v-bind(left + 'px');
     width: v-bind(width + 'px');
     height: v-bind(height + 'px');
@@ -143,6 +143,7 @@ export function translate_edge(left_grown, right_grown, weight) {
 
 export default {
     props: {
+        "top": { type: Number, default: 0, },
         "left": { type: Number, default: 0, },
         "width": { type: Number, default: 2000, },
         "height": { type: Number, default: 2000, },
@@ -176,6 +177,8 @@ export default {
         camera.position.z = 0
         camera.lookAt(0, 0, 0)
         camera.updateProjectionMatrix()
+        this.camera = camera
+        scene.add(camera)
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
         renderer.setSize( this.width, this.height, false )
         this.$refs.canvas_div.appendChild( renderer.domElement )
@@ -187,6 +190,7 @@ export default {
         // orbit control
         const orbit_control = new OrbitControls( camera, renderer.domElement )
         orbit_control.enable = true
+        this.orbit_control = orbit_control
         // start animation
         function animate() {
             requestAnimationFrame( animate )
