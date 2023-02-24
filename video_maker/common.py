@@ -20,13 +20,14 @@ def get_device_pixel_ratio():
 device_pixel_ratio = get_device_pixel_ratio()
 
 class ScreenshotMaker:
-    def __init__(self, url, width=1000, height=1000, sleep_interval=0.1, headless=True):
+    def __init__(self, url, width=1000, height=1000, sleep_interval=0.1, headless=True, crop_image=False):
         self.url = url
         self.width = width
         self.height = height
         self.screenshots = []
         self.sleep_interval = sleep_interval
         self.headless = headless
+        self.crop_image = crop_image
     def __enter__(self):
         options = Options()
         if self.headless:
@@ -41,11 +42,11 @@ class ScreenshotMaker:
         if viewport_height < self.height:
             self.driver.set_window_size(self.width, self.height + (self.height - viewport_height))
         viewport_height = self.driver.execute_script("return window.innerHeight")
-        if viewport_height != self.height:
+        if viewport_height < self.height:
             print(f"[warning] cannot set height to desired {self.height}, current height is {viewport_height}, please use a higher resolution")
         viewport_width = self.driver.execute_script("return window.innerWidth")
-        if viewport_width != self.width:
-            print(f"[warning] cannot set width to desired {self.viewport_width}, current width is {viewport_width}, please use a higher resolution")
+        if viewport_width < self.width:
+            print(f"[warning] cannot set width to desired {self.width}, current width is {viewport_width}, please use a higher resolution")
         self.driver.get(self.url)
         self.driver.execute_script(f"hide_control()")
         return self
@@ -56,6 +57,11 @@ class ScreenshotMaker:
             self.driver.execute_script(f"set_time({time})")
             sleep(self.sleep_interval)
             self.driver.get_screenshot_as_file(filepath)
+            if self.crop_image:
+                from PIL import Image
+                im = Image.open(filepath)
+                im1 = im.crop((0, 0, self.width, self.height))
+                im1.save(filepath)
         self.screenshots.append(filepath)
     def make_video(self, fps, filepath):
         clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(self.screenshots, fps=fps)

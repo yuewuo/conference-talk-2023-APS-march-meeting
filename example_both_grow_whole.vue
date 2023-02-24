@@ -13,7 +13,7 @@
 import fusion_3d from './common/fusion_3d.vue'
 import example_both_grow from './common/example_both_grow.vue'
 
-const padding = 1
+const padding = 0.5
 const pause = 1
 const single_animate = 2
 const duration = padding * 2 + pause + single_animate * 2

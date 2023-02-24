@@ -35,6 +35,9 @@
                 <div v-if="qubit_show(i, j)" class="qubit" :style="{ 'background-color': qubit_color(i, j), 'opacity': qubit_opacity, 'top': pos(i) - qubit_radius + 'px', 'left': pos(j) - qubit_radius + 'px', }"></div>
             </div>
         </div>
+        <!-- extra data qubits --><div v-for="qubit of extra_data_qubits">
+            <div class="qubit" :style="{ 'background-color': qubit_color(1, 1), 'top': pos(qubit.i) - qubit_radius + 'px', 'left': pos(qubit.j) - qubit_radius + 'px', }"></div>
+        </div>
         <!-- errors --><div v-for="error of animated_errors">
             <div v-if="error_current_show(error)" class="error" :style="{ 'top': pos(error.i) - error_radius + 'px', 'left': pos(error.j) - error_radius + 'px', 'opacity': error_opacity(error), }">
                 {{ error.text }}
@@ -191,6 +194,10 @@ export default {
         "animated_errors": { type: Array,
             default: [],
             // default: [ { start:0.5, last: 0.8, animate: 0.1, i: 2, j: 2, text: 'X' } ],
+        },
+        "extra_data_qubits":{ type: Array,
+            default: [],
+            // default: [ { i: 2, j: 2 } ],
         },
         "show_virtual": { type: Boolean, default: true, },
         "error_rotate_speed": { type: Number, default: 200, },

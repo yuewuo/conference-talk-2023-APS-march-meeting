@@ -9,7 +9,7 @@ HEIGHT = 2000
 URL = f"http://localhost:8095/index.html?animation=example_both_grow_whole&scale=2"
 FRAME_RATE = 60
 # FRAME_RATE = 5  # for debugging
-DURATION = 7
+DURATION = 6
 
 USE_EXISTING_IMAGES = False
 if 'USE_EXISTING_IMAGES' in os.environ and os.environ["USE_EXISTING_IMAGES"] != "":
