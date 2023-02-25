@@ -4,10 +4,9 @@ from alive_progress import alive_bar
 FOLDER = "screenshots_example_both_grow_single"
 common.create_folder(FOLDER)
 
-SCALE = 1 / common.device_pixel_ratio
-WIDTH = int(4500 * SCALE)
-HEIGHT = int(2000 * SCALE)
-URL = f"http://localhost:8095/index.html?animation=example_both_grow_single&scale={SCALE}"
+WIDTH = 4500
+HEIGHT = 2000
+URL = f"http://localhost:8095/index.html?animation=example_both_grow_single&scale=2"
 FRAME_RATE = 60
 # FRAME_RATE = 5  # for debugging
 DURATION = 2.5

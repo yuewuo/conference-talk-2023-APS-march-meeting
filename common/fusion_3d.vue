@@ -85,6 +85,30 @@ export const grown_edge_material = new THREE.MeshStandardMaterial({
     transparent: true,
     side: THREE.FrontSide,
 })
+export const grown_increasing_edge_material = new THREE.MeshStandardMaterial({
+    color: 0xff0000,
+    opacity: 1,
+    transparent: true,
+    side: THREE.FrontSide,
+})
+export const grown_decreasing_edge_material = new THREE.MeshStandardMaterial({
+    color: 0xff0000,
+    opacity: 1,
+    transparent: true,
+    side: THREE.FrontSide,
+})
+export function set_variable_grown_edge_color(interpolate) {
+    if (interpolate < 0) interpolate = 0
+    if (interpolate > 1) interpolate = 1
+    const n = 8
+    const ratio = 1 - Math.pow(2, n) * Math.pow(interpolate - 0.5, n)
+    grown_increasing_edge_material.color.lerpColors(
+        grown_edge_material.color, new THREE.Color( 0x8A2BE2 ), ratio
+    )
+    grown_decreasing_edge_material.color.lerpColors(
+        grown_edge_material.color, new THREE.Color( 0xADFF2F ), ratio
+    )
+}
 export const subgraph_edge_material = new THREE.MeshStandardMaterial({
     color: 0x0000ff,
     opacity: 1,
@@ -154,6 +178,7 @@ export default {
         "snapshot_idx": { type: Number, default: 0, },  // can be any fractional number, if so, the data is interpolated
         "edge_opacity": { type: Number, default: edge_material.opacity },
         "show_dual_region": { type: Boolean, default: true },
+        "variable_grown_edge_color": { type: Boolean, default: true },
     },
     data() {
         return {
@@ -224,6 +249,8 @@ export default {
                 return
             }
             const fusion_data = this.fusion_data
+            const interpolate = this.snapshot_idx - Math.floor(this.snapshot_idx)
+            set_variable_grown_edge_color(interpolate)
             const snapshot_idx_1 = Math.floor(this.snapshot_idx)
             const snapshot_idx_2 = snapshot_idx_1 == this.snapshot_idx ? snapshot_idx_1 : snapshot_idx_1 + 1
             const snapshot_1 = fusion_data.snapshots[snapshot_idx_1][1]
@@ -334,8 +361,10 @@ export default {
                         right_start: compute_vector3(left_position).add(relative.clone().multiplyScalar(right_start / distance)),
                     }
                 })
-                for (let [start, end, edge_meshes, is_grown_part] of [[left_start, left_end, left_edge_meshes, true], [left_end, right_end, middle_edge_meshes, false]
-                        , [right_end, right_start, right_edge_meshes, true]]) {
+                for (let [start, end, edge_meshes, is_grown_part, g_delta] of [
+                        [left_start, left_end, left_edge_meshes, true, edge_2.lg - edge_1.lg]
+                        , [left_end, right_end, middle_edge_meshes, false, 0]
+                        , [right_end, right_start, right_edge_meshes, true, edge_2.rg - edge_1.rg]]) {
                     while (edge_meshes.length <= i) {
                         let two_edges = [null, null]
                         for (let j of [0, 1]) {
@@ -362,6 +391,15 @@ export default {
                             edge_mesh.visible = false
                         }
                         edge_mesh.material = is_grown_part ? grown_edge_material : edge_material
+                        if (is_grown_part && this.variable_grown_edge_color) {
+                            if (g_delta > 0) {
+                                edge_mesh.material = grown_increasing_edge_material
+                            } else if (g_delta == 0) {
+                                edge_mesh.material = grown_edge_material
+                            } else {
+                                edge_mesh.material = grown_decreasing_edge_material
+                            }
+                        }
                         if (snapshot_1.subgraph != null) {
                             edge_mesh.material = edge_material  // do not display grown edges
                         }
