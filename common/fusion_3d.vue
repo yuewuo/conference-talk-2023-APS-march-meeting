@@ -1,6 +1,6 @@
 <template>
     <div class="canvas" ref="canvas_div">
-        
+
     </div>
 </template>
 
@@ -19,15 +19,15 @@
 <script async>
 
 // commonly used vectors
-const zero_vector = new THREE.Vector3( 0, 0, 0 )
-const unit_up_vector = new THREE.Vector3( 0, 1, 0 )
+const zero_vector = new THREE.Vector3(0, 0, 0)
+const unit_up_vector = new THREE.Vector3(0, 1, 0)
 
 // create common geometries
 const segment = 128
 const vertex_radius = 0.15
-const vertex_geometry = new THREE.SphereGeometry( vertex_radius, segment, segment )
+const vertex_geometry = new THREE.SphereGeometry(vertex_radius, segment, segment)
 const edge_radius = 0.03
-const edge_geometry = new THREE.CylinderGeometry( edge_radius, edge_radius, 1, segment, 1, true )
+const edge_geometry = new THREE.CylinderGeometry(edge_radius, edge_radius, 1, segment, 1, true)
 edge_geometry.translate(0, 0.5, 0)
 
 // create common materials
@@ -103,10 +103,10 @@ export function set_variable_grown_edge_color(interpolate) {
     const n = 8
     const ratio = 1 - Math.pow(2, n) * Math.pow(interpolate - 0.5, n)
     grown_increasing_edge_material.color.lerpColors(
-        grown_edge_material.color, new THREE.Color( 0x8A2BE2 ), ratio
+        grown_edge_material.color, new THREE.Color(0x8A2BE2), ratio
     )
     grown_decreasing_edge_material.color.lerpColors(
-        grown_edge_material.color, new THREE.Color( 0xADFF2F ), ratio
+        grown_edge_material.color, new THREE.Color(0xADFF2F), ratio
     )
 }
 export const subgraph_edge_material = new THREE.MeshStandardMaterial({
@@ -137,7 +137,7 @@ const vertex_outline_radius = vertex_radius * outline_ratio
 
 // helper functions
 export function compute_vector3(data_position) {
-    let vector = new THREE.Vector3( 0, 0, 0 )
+    let vector = new THREE.Vector3(0, 0, 0)
     load_position(vector, data_position)
     return vector
 }
@@ -172,7 +172,8 @@ export default {
         "width": { type: Number, default: 2000, },
         "height": { type: Number, default: 2000, },
         "camera_scale": { type: Number, default: 6, },
-        "fusion_data": { type: Object,
+        "fusion_data": {
+            type: Object,
             default: fusion_data_example,
         },
         "snapshot_idx": { type: Number, default: 0, },  // can be any fractional number, if so, the data is interpolated
@@ -191,10 +192,10 @@ export default {
         // create scene
         const scene = new THREE.Scene()
         // scene.background = new THREE.Color( 0xffffff )  // for better image output
-        scene.add( new THREE.AmbientLight( 0xffffff ) )
+        scene.add(new THREE.AmbientLight(0xffffff))
         const aspect_ratio = this.width / this.height
         const camera_scale = this.camera_scale
-        const camera = new THREE.OrthographicCamera( - aspect_ratio * camera_scale, aspect_ratio * camera_scale, camera_scale, -camera_scale, 0.1, 100000 )
+        const camera = new THREE.OrthographicCamera(- aspect_ratio * camera_scale, aspect_ratio * camera_scale, camera_scale, -camera_scale, 0.1, 100000)
         camera.left = - aspect_ratio * camera_scale
         camera.right = aspect_ratio * camera_scale
         camera.position.x = 0
@@ -205,22 +206,28 @@ export default {
         this.camera = camera
         scene.add(camera)
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-        renderer.setSize( this.width, this.height, false )
-        this.$refs.canvas_div.appendChild( renderer.domElement )
+        renderer.setSize(this.width, this.height, false)
+        this.$refs.canvas_div.appendChild(renderer.domElement)
         const canvas = renderer.domElement
         canvas.width = this.width
         canvas.height = this.height
         canvas.style.width = `${this.width}px`
         canvas.style.height = `${this.height}px`
         // orbit control
-        const orbit_control = new OrbitControls( camera, renderer.domElement )
+        const orbit_control = new OrbitControls(camera, renderer.domElement)
         orbit_control.enable = true
         this.orbit_control = orbit_control
         // start animation
+        let last_camera_position = camera.position.clone()
         function animate() {
-            requestAnimationFrame( animate )
+            requestAnimationFrame(animate)
             orbit_control.update()
-            renderer.render( scene, camera )
+            renderer.render(scene, camera)
+            if (!camera.position.equals(last_camera_position)) {
+                console.log(`camera position updated`)
+                console.log(camera.position)
+                last_camera_position = camera.position.clone()
+            }
         }
         animate()
         // meshes that can be reused across different snapshots
@@ -241,7 +248,7 @@ export default {
         console.log("fusion 3d component mounted")
     },
     computed: {
-        
+
     },
     methods: {
         async refresh_snapshot_data() {
@@ -282,13 +289,13 @@ export default {
                 }
                 let position = fusion_data.positions[i]
                 while (vertex_meshes.length <= i) {
-                    const vertex_mesh = new THREE.Mesh( vertex_geometry, real_vertex_material )
+                    const vertex_mesh = new THREE.Mesh(vertex_geometry, real_vertex_material)
                     vertex_mesh.visible = false
                     vertex_mesh.userData = {
                         type: "vertex",
                         vertex_index: vertex_meshes.length,
                     }
-                    scene.add( vertex_mesh )
+                    scene.add(vertex_mesh)
                     vertex_meshes.push(vertex_mesh)
                 }
                 const vertex_mesh = vertex_meshes[i]
@@ -362,19 +369,19 @@ export default {
                     }
                 })
                 for (let [start, end, edge_meshes, is_grown_part, g_delta] of [
-                        [left_start, left_end, left_edge_meshes, true, edge_2.lg - edge_1.lg]
-                        , [left_end, right_end, middle_edge_meshes, false, 0]
-                        , [right_end, right_start, right_edge_meshes, true, edge_2.rg - edge_1.rg]]) {
+                    [left_start, left_end, left_edge_meshes, true, edge_2.lg - edge_1.lg]
+                    , [left_end, right_end, middle_edge_meshes, false, 0]
+                    , [right_end, right_start, right_edge_meshes, true, edge_2.rg - edge_1.rg]]) {
                     while (edge_meshes.length <= i) {
                         let two_edges = [null, null]
                         for (let j of [0, 1]) {
-                            const edge_mesh = new THREE.Mesh( edge_geometry, edge_material )
+                            const edge_mesh = new THREE.Mesh(edge_geometry, edge_material)
                             edge_mesh.userData = {
                                 type: "edge",
                                 edge_index: edge_meshes.length,
                             }
                             edge_mesh.visible = false
-                            scene.add( edge_mesh )
+                            scene.add(edge_mesh)
                             two_edges[j] = edge_mesh
                         }
                         edge_meshes.push(two_edges)
@@ -426,12 +433,12 @@ export default {
                 }
                 let position = fusion_data.positions[i]
                 while (vertex_outline_meshes.length <= i) {
-                    const vertex_outline_mesh = new THREE.Mesh( vertex_geometry, real_vertex_outline_material )
+                    const vertex_outline_mesh = new THREE.Mesh(vertex_geometry, real_vertex_outline_material)
                     vertex_outline_mesh.visible = false
                     vertex_outline_mesh.scale.x = outline_ratio
                     vertex_outline_mesh.scale.y = outline_ratio
                     vertex_outline_mesh.scale.z = outline_ratio
-                    scene.add( vertex_outline_mesh )
+                    scene.add(vertex_outline_mesh)
                     vertex_outline_meshes.push(vertex_outline_mesh)
                 }
                 const vertex_outline_mesh = vertex_outline_meshes[i]
@@ -451,7 +458,7 @@ export default {
             // draw convex
             if (snapshot_1.dual_nodes != null && this.show_dual_region) {
                 for (let blossom_convex_mesh of blossom_convex_meshes) {
-                    scene.remove( blossom_convex_mesh )
+                    scene.remove(blossom_convex_mesh)
                     blossom_convex_mesh.geometry.dispose()
                 }
                 for (let [i, dual_node_1] of snapshot_1.dual_nodes.entries()) {
@@ -500,24 +507,24 @@ export default {
                                 // special optimization for 2D points, because ConvexGeometry doesn't work well on them
                                 const points_2d = []
                                 for (let point of points) {
-                                    points_2d.push([ point.x, point.z ])
+                                    points_2d.push([point.x, point.z])
                                 }
                                 const hull_points = hull(points_2d, 1)
                                 const shape_points = []
                                 for (let hull_point of hull_points) {
-                                    shape_points.push( new THREE.Vector2( hull_point[0], hull_point[1] ) );
+                                    shape_points.push(new THREE.Vector2(hull_point[0], hull_point[1]));
                                 }
-                                const shape = new THREE.Shape( shape_points )
-                                const geometry = new THREE.ShapeGeometry( shape )
-                                const blossom_convex_mesh = new THREE.Mesh( geometry, blossom_convex_material_2d )
-                                blossom_convex_mesh.position.set( 0, -0.2, 0 )  // place the plane to slightly below the vertices for better viz
-                                blossom_convex_mesh.rotation.set( Math.PI / 2, 0, 0 );
-                                scene.add( blossom_convex_mesh )
+                                const shape = new THREE.Shape(shape_points)
+                                const geometry = new THREE.ShapeGeometry(shape)
+                                const blossom_convex_mesh = new THREE.Mesh(geometry, blossom_convex_material_2d)
+                                blossom_convex_mesh.position.set(0, -0.2, 0)  // place the plane to slightly below the vertices for better viz
+                                blossom_convex_mesh.rotation.set(Math.PI / 2, 0, 0);
+                                scene.add(blossom_convex_mesh)
                                 blossom_convex_meshes.push(blossom_convex_mesh)
                             } else {
-                                const geometry = new ConvexGeometry( points )
-                                const blossom_convex_mesh = new THREE.Mesh( geometry, blossom_convex_material )
-                                scene.add( blossom_convex_mesh )
+                                const geometry = new ConvexGeometry(points)
+                                const blossom_convex_mesh = new THREE.Mesh(geometry, blossom_convex_material)
+                                scene.add(blossom_convex_mesh)
                                 blossom_convex_meshes.push(blossom_convex_mesh)
                             }
                         }
