@@ -50,7 +50,7 @@ class ScreenshotMaker:
         self.driver = webdriver.Chrome(service=service_object, options=options)
         if not self.headless:
             # put window in the dummy monitor
-            self.driver.set_window_position(3000, 500)
+            self.driver.set_window_position(5000, 500)
         self.device_pixel_ratio = self.driver.execute_script(
             "return window.devicePixelRatio"
         )
@@ -71,6 +71,7 @@ class ScreenshotMaker:
                 f"[warning] cannot set width to desired {self.width}, current width is {viewport_width}, please use a higher resolution"
             )
         self.driver.get(self.url)
+        sleep(1)
         self.driver.execute_script(f"hide_control()")
         return self
 
